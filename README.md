@@ -1,5 +1,5 @@
 # Android_Webserver
-A Python Chat Server on Android 
+A Python Chat Server on Android. Use htttpd and Apache . Apache can only run on Ports > 1024 . index.html redirect to the Apache Server.
 
 Requirements:
  
