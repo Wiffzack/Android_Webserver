@@ -20,3 +20,5 @@ Requirements in GnuRoot:
 - Apache
 
 - Very important    : no sense of security or paranoia
+
+The most important is to reduce the HTML,CSS and Java to the absolut smallest possible. Use [html uglify](http://minifycode.com/html-minifier/). and [HTML compresser](http://htmlcompressor.com/compressor/)
