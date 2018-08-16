@@ -3,20 +3,20 @@ A Python Chat Server on Android
 
 Requirements:
  
-Rooted Android 
+- Rooted Android 
 
-Terminal App      : Android Terminal Emulator or etc.
+- Terminal App      : Android Terminal Emulator or etc.
 
-BusyBox
+- BusyBox
 
-GnuRoot
+- GnuRoot
 
 Requirements in GnuRoot:
 
-Python2.7
+- Python2.7
 
-MySQL
+- MySQL
 
-Apache
+- Apache
 
-Very important    : no sense of security or paranoia
+- Very important    : no sense of security or paranoia
