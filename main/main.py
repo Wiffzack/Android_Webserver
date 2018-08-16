@@ -59,7 +59,7 @@ threads = []
 workn = 1
 data = ''
 
-#wiffzackius.ddns.net
+# address of your mysql server
 mysqln = '127.0.0.1'
 
 
