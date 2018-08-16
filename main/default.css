@@ -1,0 +1,238 @@
+@import url('https://fonts.googleapis.com/css?family=Lobster');
+* {margin: 0;}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input {display:none;}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+iframe {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  -webkit-filter: sepia(1);
+}
+@media (min-aspect-ratio: 16/9) {
+iframe {
+    height: 300%; top: -100%;
+    /* or height: 200%; top: -50%;
+       or height: 400%; top: -150%; */
+  }
+}
+@media (max-aspect-ratio: 16/9) {
+iframe {
+    width: 300%; left: -100%;
+    /* or width: 200%; left: -50%;
+       or width: 400%; left: -150%; */
+  }
+}
+
+img {
+  position: fixed; 
+  left: 50%; top: 50%;
+  margin-left: -350px;
+  margin-top: -300px;
+  width: 700px; height: auto;}
+   
+.dropbtn {
+    font-family: 'Lobster';
+    background-color: #3498DB;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+.dropbtn:hover, .dropbtn:focus {
+    background-color: #2980B9;
+}
+
+.dropdown {
+    position: relative;
+    font-family: 'Lobster';
+    z-index: 100;
+    display: inline-block;
+}
+
+.dropdown-content {
+    font-family: 'Lobster';
+    display: none;
+    position: relative;
+    z-index: 1;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    overflow: auto;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+	transition: all 1s ease-in;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+
+body {
+  margin: 0;
+  background: #000; 
+}
+
+video { 
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: -100;
+    transform: translateX(-50%) translateY(-50%);
+  background-size: cover;
+  transition: 1s opacity;
+}
+
+audio { 
+   display:none;
+}
+
+.stopfade { 
+   opacity: .5;
+}
+
+a {
+  display: inline-block;
+  color: #fff;
+  text-decoration: none;
+  background:rgba(0,0,0,0.5);
+  padding: .5rem;
+  transition: .6s background; 
+}
+a:hover{
+  background:rgba(0,0,0,0.9);
+}
+@media screen and (max-width: 500px) { 
+  div{width:70%;} 
+}
+@media screen and (max-device-width: 800px) {
+  #bgvid { display: none; }
+}
+
+.butto_down {
+	position: relative;
+	bottom: 20px;
+	left: 5px;
+	right: 5px;
+    top: 250px;
+}
+
+.chat-box {
+    position:fixed;
+    right:15px;
+    bottom:0;
+    box-shadow:0 0 0.1em #000;
+}
+
+.chat-closed {
+    width: 250px;
+    height: 35px;
+    background: #8bc34a;
+    line-height: 35px;
+    font-size: 18px;
+    text-align: center;
+    border:1px solid #777;
+    color: #000;
+}
+
+.chat-header {
+    width: 250px;
+    height: 35px;
+    background: #8bc34a;
+    line-height: 33px;
+    text-indent: 20px;
+    border:1px solid #777;
+    border-bottom:none;
+}
+
+.chat-content{
+    width:250px;
+    height:300px;
+    background:#ffffff;
+    border:1px solid #777;
+    overflow-y:auto;
+    word-wrap: break-word;
+}
+
+.box{
+    width:10px;
+    height:10px;
+    background:green;
+    float:left;
+    position:relative;
+    top: 11px;
+    left: 10px;
+    border:1px solid #ededed;
+}
+
+.hide {
+    display:none;
+}
+
+.dropdown a:hover {background-color: #ddd}
+
+.show {display:block;}
