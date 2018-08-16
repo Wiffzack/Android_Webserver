@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body onload="setHref()">
+<link rel="canonical" href="http://YourDomainName/"/>
+<h2>YourDomainName</h2>
+<p></p>
+
+
+<noscript> 
+<meta http-equiv="refresh" content="0;URL=http://YourDomainName:2080">
+</noscript>
+
+
+<script type="text/javascript"> 
+var url = "http://YourDomainName:2080"; if(typeof IE_fix != "undefined")  
+{ 
+document.write("redirecting...");
+var referLink  = document.createElement("a"); referLink.href = url; document.body.appendChild(referLink); referLink.click(); 
+}
+else 
+{ window.location.replace(url); 
+} 
+</script>
+
+
+
+</body>
+</html>
