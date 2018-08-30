@@ -65,10 +65,10 @@ mysqln = '127.0.0.1'
 
 try:
 	try:
-		cnx = mysql.connector.connect(user='test', password='fujitsu', database='unterlagen')
+		cnx = mysql.connector.connect(user='test', password=Password, database='unterlagen')
 		cursor = cnx.cursor()
 	except:
-		cnx = mysql.connector.connect(host=mysqln, user='test', password='fujitsu', database='unterlagen')
+		cnx = mysql.connector.connect(host=mysqln, user='test', password=Password, database='unterlagen')
 		cursor = cnx.cursor()
 except:
 	print ("MySQL not available!")
