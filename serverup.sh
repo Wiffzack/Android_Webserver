@@ -67,6 +67,19 @@ iptables -A FORWARD -i rmnet0 -o wlan0 -m von traf --ctstate ESTABLISHED,RELATED
 
 iptables -A INPUT -m state --state NEW -p tcp --dport 80 -j ACCEPT
 
+if ping -c 1 192.168.43.109 &> /dev/null
+then 
+echo "forward Webserver"
+iptables -A OUTPUT -p tcp --sport 80 -m conntrack --ctstate ESTABLISHED -j ACCEPT
+iptables -A INPUT -p tcp --dport 8080  -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+iptables -A INPUT -m state --state NEW -p tcp --dport 8080 -j ACCEPT
+iptables -A FORWARD -i rmnet0 -o wlan0 -j ACCEPT
+iptables -A FORWARD -i rmnet0 -o wlan0 -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A FORWARD -i rmnet0 -p tcp --dport 8080 -d 192.168.43.109 -j ACCEPT
+iptables -A PREROUTING -t nat -i rmnet0 -p tcp --dport 8080 -j DNAT --to 192.168.43.109:80
+iptables -A FORWARD -p tcp -d 192.168.43.109 --dport 8080 -j ACCEPT
+iptables -A POSTROUTING -t nat -o wlan0 -j MASQUERADE
+else
 if ping -c 1 8.8.8.8 &> /dev/null
 then
 echo "Webserver"
@@ -77,6 +90,7 @@ echo "Webserver"
 httpd -p $ip -c /storage/3830-3361/homepage/ -h /storage/3830-3361/homepage/      
 else
   echo "no connection"
+fi
 fi
 fi
 echo roundx
