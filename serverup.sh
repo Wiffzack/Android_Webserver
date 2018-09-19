@@ -1,5 +1,4 @@
  #!/system/bin/sh
- 
 iptables -F
 ip="0.0.0.0"
 default="192.168.43.1"
@@ -9,6 +8,106 @@ UPLINK="300"
 UPLINKL="$((9*$UPLINK/10))"
 DEV='rmnet0'
 TC='tc'
+ 
+
+function settingopt() {
+
+hport="1024:6535"
+lport="0:1023"
+modemif=rmnet0
+DOWNLINK=500
+UPLINK=220
+DEV=rmnet0
+IPTABLES='iptables'
+
+
+# Extra Rules
+sysctl -w net.ipv4.conf.default.rp_filter=1
+sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1
+sysctl -w net.ipv4.conf.all.rp_filter=1
+sysctl -w net.ipv4.conf.default.rp_filter=1
+sysctl  -w net/netfilter/nf_conntrack_tcp_loose=0
+echo 1 > /proc/sys/net/ipv4/icmp_echo_ignore_broadcasts
+echo 1 > /proc/sys/net/ipv4/icmp_ignore_bogus_error_responses
+sysctl -w net.ipv4.tcp_synack_retries=10
+echo 0 > /proc/sys/net/ipv4/tcp_slow_start_after_idle
+echo 3000000 > /proc/sys/fs/nr_open
+echo 1 > /proc/sys/net/ipv4/ip_forward
+echo 4096 > /proc/sys/net/ipv4/route/max_size
+echo 2048 > /proc/sys/net/ipv4/route/gc_thresh
+echo 100 >  /proc/sys/net/ipv4/neigh/default/unres_qlen
+#echo 1 > /proc/sys/net/ipv4/tcp_delack_min
+sysctl -w net.ipv4.tcp_max_syn_backlog=4096
+# The maximum number of "backlogged sockets".  Default is 128.
+sysctl -w net.core.somaxconn=1024
+
+echo Normale Sicherheitsregeln wurden angewandt
+iptables -m state --state INVALID -j DROP
+iptables -A INPUT -m state --state INVALID -j DROP
+iptables -A FORWARD -p tcp --syn -m limit --limit 5/s -j ACCEPT
+iptables -A FORWARD -p tcp --tcp-flags SYN,ACK,FIN,RST RST -m limit --limit 1/s -j ACCEPT
+iptables -A FORWARD -p icmp --icmp-type echo-request -m limit --limit 1/s -j ACCEPT
+iptables -A INPUT -p icmp -m limit --limit  1/s --limit-burst 1 -j ACCEPT
+iptables -A INPUT -p tcp --tcp-flags ALL ALL -j DROP
+iptables -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
+iptables -p tcp --syn --dport 80 -m connlimit --connlimit-above 20 --connlimit-mask 24 -j DROP
+iptables -A INPUT -p tcp --syn -m limit --limit 5 /second --limit-burst 8 -j DROP
+iptables -A INPUT -m state --state RELATED,ESTABLISHED -m limit --limit 100/second --limit-burst 100 -j ACCEPT
+iptables -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS  --clamp-mss-to-pmtu
+
+## TCP Xmas Tree Scan
+### Action for packets
+iptables -I FORWARD -p tcp --tcp-flags ALL URG,PSH,FIN -j REJECT --reject-with tcp-reset
+
+#SSH
+iptables -I INPUT -p tcp --dport 22 -i rmnet0 -m state --state NEW -m recent --set
+iptables -I INPUT -p tcp --dport 22 -i rmnet0 -m state --state NEW -m recent  --update --seconds 60 --hitcount 4 -j DROP
+
+### DROPspoofing packets
+iptables -A INPUT -s 10.0.0.0/8 -j DROP 
+iptables -A INPUT -s 169.254.0.0/16 -j DROP
+iptables -A INPUT -s 172.16.0.0/12 -j DROP
+iptables -A INPUT -s 127.0.0.0/8 -j DROP
+#iptables -A INPUT -s 192.168.0.0/24 -j DROP
+
+# Droping all invalid packets
+iptables -A INPUT -m state --state INVALID -j DROP
+iptables -A FORWARD -m state --state INVALID -j DROP
+iptables -A OUTPUT -m state --state INVALID -j DROP
+
+# flooding of RST packets, smurf attack Rejection
+iptables -A INPUT -p tcp -m tcp --tcp-flags RST RST -m limit --limit 2/second --limit-burst 2 -j ACCEPT
+
+#DNS Limit
+iptables -A INPUT -p udp --dport 53 --set --name dnslimit
+iptables -A INPUT -p udp --dport 53 -m recent --update --seconds 2 --hitcount 2 --name dnslimit -j DROP
+iptables -A OUTPUT -p udp --dport 53 -m recent --update --seconds 2 --hitcount 2 --name dnslimit -j DROP
+iptables -A FORWARD -p udp --dport 53 -m recent --seconds 2 --hitcount 2 --name dnslimit --set -j DROP
+
+iptables  -A INPUT -p tcp --syn --dport 53 -m connlimit --connlimit-above 20 -j DROP
+
+iptables -A INPUT -p tcp --dport 53 -m state --state NEW -m limit --limit 2/second --limit-burst 2 -j ACCEPT
+iptables -A INPUT -p udp --dport 53 -m state --state NEW -m limit --limit 2/second --limit-burst 2 -j ACCEPT
+
+#String Filter
+
+#Block Advertising
+iptables -I INPUT -p tcp --dport 80 -m string --to 70 --algo bm --string 'GET /advertising' -j DROP
+
+#Passive FTP
+iptables -A INPUT -p tcp --sport 1024: --dport 1024:  -m state --state ESTABLISHED -j DROP 
+iptables -A OUTPUT -p tcp --sport 1024: --dport 1024:  -m state --state ESTABLISHED,RELATED -j DROP
+
+#Aktive FTP
+iptables -A INPUT     -p tcp --sport 20 -m state --state ESTABLISHED,RELATED -j DROP
+iptables -A OUTPUT -p tcp --dport 20 -m state --state ESTABLISHED -j DROP
+ 
+#Drop Zero Packets
+iptables -A INPUT -m length --length 0 -j DROP
+iptables -A PREROUTING -p udp -m length --length 28:64 -j DROP
+echo hi
+}
+
 
 
 #echo 40 > /proc/sys/vm/swappiness
@@ -18,7 +117,7 @@ TC='tc'
 #setserial -a /dev/ttyGS0 low_latency spd_warp
 
 
-#settingopt()
+settingopt
 #ipopt()
 
 while [ 1 ]
@@ -62,8 +161,6 @@ busybox kill $kine
 
 sysctl -w net.ipv4.ip_forward=1 
 iptables -A INPUT -i rmnet0 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT 
-iptables -A FORWARD -i rmnet0 -o wlan0 -m von traf --ctstate ESTABLISHED,RELATED -j ACCEPT 
-
 
 iptables -A INPUT -m state --state NEW -p tcp --dport 80 -j ACCEPT
 
@@ -73,10 +170,16 @@ echo "forward Webserver"
 iptables -A OUTPUT -p tcp --sport 80 -m conntrack --ctstate ESTABLISHED -j ACCEPT
 iptables -A INPUT -p tcp --dport 8080  -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
 iptables -A INPUT -m state --state NEW -p tcp --dport 8080 -j ACCEPT
+iptables -A INPUT -m state --state NEW -p tcp --dport 5001 -j ACCEPT
+iptables -A INPUT -m state --state NEW -p tcp --dport 5000 -j ACCEPT
 iptables -A FORWARD -i rmnet0 -o wlan0 -j ACCEPT
 iptables -A FORWARD -i rmnet0 -o wlan0 -m state --state ESTABLISHED,RELATED -j ACCEPT
 iptables -A FORWARD -i rmnet0 -p tcp --dport 8080 -d 192.168.43.109 -j ACCEPT
+iptables -A FORWARD -i rmnet0 -p tcp --dport 5000 -d 192.168.43.109 -j ACCEPT
+iptables -A FORWARD -i rmnet0 -p tcp --dport 5001 -d 192.168.43.109 -j ACCEPT
 iptables -A PREROUTING -t nat -i rmnet0 -p tcp --dport 8080 -j DNAT --to 192.168.43.109:80
+iptables -A PREROUTING -t nat -i rmnet0 -p tcp --dport 5000 -j DNAT --to 192.168.43.109:5000
+iptables -A PREROUTING -t nat -i rmnet0 -p tcp --dport 5001 -j DNAT --to 192.168.43.109:5001
 iptables -A FORWARD -p tcp -d 192.168.43.109 --dport 8080 -j ACCEPT
 iptables -A POSTROUTING -t nat -o wlan0 -j MASQUERADE
 else
@@ -97,12 +200,3 @@ echo roundx
 sleep 200
 
 done
-
-
-
-
-
-
-
-
-
