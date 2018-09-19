@@ -72,7 +72,7 @@ iptables -A INPUT -s 127.0.0.0/8 -j DROP
 
 # Droping all invalid packets
 iptables -A INPUT -m state --state INVALID -j DROP
-iptables -A FORWARD -m state --state INVALID -j DROP
+#iptables -A FORWARD -m state --state INVALID -j DROP
 iptables -A OUTPUT -m state --state INVALID -j DROP
 
 # flooding of RST packets, smurf attack Rejection
@@ -93,10 +93,6 @@ iptables -A INPUT -p udp --dport 53 -m state --state NEW -m limit --limit 2/seco
 
 #Block Advertising
 iptables -I INPUT -p tcp --dport 80 -m string --to 70 --algo bm --string 'GET /advertising' -j DROP
-
-#Passive FTP
-iptables -A INPUT -p tcp --sport 1024: --dport 1024:  -m state --state ESTABLISHED -j DROP 
-iptables -A OUTPUT -p tcp --sport 1024: --dport 1024:  -m state --state ESTABLISHED,RELATED -j DROP
 
 #Aktive FTP
 iptables -A INPUT     -p tcp --sport 20 -m state --state ESTABLISHED,RELATED -j DROP
@@ -160,6 +156,7 @@ kine=$(busybox pidof inetd)
 busybox kill $kine
 
 sysctl -w net.ipv4.ip_forward=1 
+echo 1 | tee /proc/sys/net/ipv4/ip_forward
 iptables -A INPUT -i rmnet0 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT 
 
 iptables -A INPUT -m state --state NEW -p tcp --dport 80 -j ACCEPT
@@ -168,10 +165,26 @@ if ping -c 1 192.168.43.109 &> /dev/null
 then 
 echo "forward Webserver"
 iptables -A OUTPUT -p tcp --sport 80 -m conntrack --ctstate ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -p tcp --sport 5001 -m conntrack --ctstate ESTABLISHED -j ACCEPT
+iptables -A OUTPUT -p tcp --sport 5000 -m conntrack --ctstate ESTABLISHED -j ACCEPT
 iptables -A INPUT -p tcp --dport 8080  -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
 iptables -A INPUT -m state --state NEW -p tcp --dport 8080 -j ACCEPT
 iptables -A INPUT -m state --state NEW -p tcp --dport 5001 -j ACCEPT
 iptables -A INPUT -m state --state NEW -p tcp --dport 5000 -j ACCEPT
+
+iptables -A FORWARD -i rmnet0 -o wlan0 -p tcp --syn --dport 80 -m conntrack --ctstate NEW -j ACCEPT
+iptables -A FORWARD -i rmnet0 -o wlan0 -p tcp --syn --dport 5001 -m conntrack --ctstate NEW -j ACCEPT
+iptables -A FORWARD -i rmnet0 -o wlan0 -p tcp --syn --dport 5000 -m conntrack --ctstate NEW -j ACCEPT
+iptables -A FORWARD -i rmnet0 -o wlan0 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+iptables -A FORWARD -i wlan0 -o rmnet0 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+iptables -t nat -A PREROUTING -i rmnet0 -p tcp --dport 80 -j DNAT --to-destination 192.168.43.109
+iptables -t nat -A PREROUTING -i rmnet0 -p tcp --dport 5001 -j DNAT --to-destination 192.168.43.109
+iptables -t nat -A PREROUTING -i rmnet0 -p tcp --dport 5000 -j DNAT --to-destination 192.168.43.109
+iptables -t nat -A POSTROUTING -o rmnet0 -p tcp --dport 80 -d $ip -j SNAT --to-source 192.168.43.1
+
+
+iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to 192.168.43.109:80
+iptables -A FORWARD -d 192.168.43.109 -p tcp --dport 80 -j ACCEPT
 iptables -A FORWARD -i rmnet0 -o wlan0 -j ACCEPT
 iptables -A FORWARD -i rmnet0 -o wlan0 -m state --state ESTABLISHED,RELATED -j ACCEPT
 iptables -A FORWARD -i rmnet0 -p tcp --dport 8080 -d 192.168.43.109 -j ACCEPT
