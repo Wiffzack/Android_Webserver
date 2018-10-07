@@ -1,6 +1,6 @@
 {
-  "name": "Sample Extension Commands extension",
-  "description": "Press Ctrl+Shift+F to open the browser action popup, press Ctrl+Shift+Y to send an event.",
+  "name": "GroupSearch",
+  "description": "Press Ctrl+Shift+Y to add entrys, right mouse-click - Search in the Group  for search",
   "version": "1.0",
   "manifest_version": 2,
   "permissions": [
@@ -8,6 +8,7 @@
   "contextMenus",
   "tabs", 
   "<all_urls>",
+  "input",
   "storage"
 	],  
   "background": {
@@ -24,12 +25,6 @@
         "mac": "MacCtrl+Shift+Y"
        },
       "description": "Send a 'toggle-feature' event to the extension"
-    },
-    "_execute_browser_action": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+F",
-        "mac": "MacCtrl+Shift+F"
-      }
     }
   }
 }
