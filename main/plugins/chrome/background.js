@@ -8,7 +8,7 @@ chrome.runtime.onInstalled.addListener(function() {
 	var title = "Google Search";
 	chrome.contextMenus.create({
 		id: "Search",
-		title: "some title",
+		title: "Search in the Group",
 		contexts: ["all"]
 	});
 });
