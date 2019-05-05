@@ -7,9 +7,9 @@ var xmlhttp;
 var status = " ";
 
 
-chrome.browserAction.setBadgeText( { text: status } );
+//chrome.browserAction.setBadgeText( { text: status } );
 //chrome.browserAction.setBadgeBackgroundColor({color: [0,255,0,255]});
-chrome.browserAction.setBadgeBackgroundColor({color: [0,0,250,250]});
+//chrome.browserAction.setBadgeBackgroundColor({color: [0,0,250,250]});
 
 chrome.runtime.onInstalled.addListener(function() {
 	var contexts = ["page","selection","link","editable"];
@@ -21,25 +21,24 @@ chrome.runtime.onInstalled.addListener(function() {
 	});
 });
 
-chrome.contextMenus.onClicked.addListener(function(info, tab) {
-    if (info.menuItemId == "Search") {
-		refresh();
-		mysearch();
-		if (searchword) {
-		getUrl();	
-    }
-	}
+chrome.runtime.onInstalled.addListener(function() {
+	var contexts = ["page","selection","link","editable"];
+	var title = "Google Search";
+	chrome.contextMenus.create({
+		id: "Add",
+		title: "Add to the Group",
+		contexts: ["all"]
+	});
 });
 
-
-
+//serverReachables();
 chrome.tabs.onUpdated.addListener(function() {
 	chrome.tabs.query({'active': true, 'lastFocusedWindow': true, 'currentWindow': true}, function (tabs) {tabUrl = tabs[0].url;serverReachables();});	
 });
 
 async function refresh() {
-	
-await chrome.browserAction.onClicked.addListener(function(tab) {chrome.tabs.update(tab.id, {url: url});serverReachables();});
+// serverReachables();
+await chrome.browserAction.onClicked.addListener(function(tab) {chrome.tabs.update(tab.id, {url: url});});
 await chrome.tabs.query({'active': true, 'lastFocusedWindow': true, 'currentWindow': true}, function (tabs) {tabUrl = tabs[0].url;serverReachables();});	
 }
 
@@ -158,4 +157,21 @@ chrome.commands.onCommand.addListener(function(command) {
 	}
 });
 
+chrome.contextMenus.onClicked.addListener(function(info, tab) {
+    if (info.menuItemId == "Search") {
+		refresh();
+		mysearch();
+		if (searchword) {
+		getUrl();	
+    }
+    if (info.menuItemId == "Add") {
+		refresh();
+		myFunction();
+		//console.log(window.tabUrl);
+		if (tabUrl) {
+		sendCurrentUrl();
+		}
+	}
+	}	
+});
 
