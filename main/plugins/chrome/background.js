@@ -2,6 +2,14 @@ var tabUrl;
 var keywords;
 var rating;
 var searchword;
+var httpRequest;
+var xmlhttp;
+var status = " ";
+
+
+chrome.browserAction.setBadgeText( { text: status } );
+//chrome.browserAction.setBadgeBackgroundColor({color: [0,255,0,255]});
+chrome.browserAction.setBadgeBackgroundColor({color: [0,0,250,250]});
 
 chrome.runtime.onInstalled.addListener(function() {
 	var contexts = ["page","selection","link","editable"];
@@ -26,14 +34,55 @@ chrome.contextMenus.onClicked.addListener(function(info, tab) {
 
 
 chrome.tabs.onUpdated.addListener(function() {
-	chrome.tabs.query({'active': true, 'lastFocusedWindow': true, 'currentWindow': true}, function (tabs) {tabUrl = tabs[0].url;});	
+	chrome.tabs.query({'active': true, 'lastFocusedWindow': true, 'currentWindow': true}, function (tabs) {tabUrl = tabs[0].url;serverReachables();});	
 });
 
 async function refresh() {
 	
-await chrome.browserAction.onClicked.addListener(function(tab) {chrome.tabs.update(tab.id, {url: url});});
-await chrome.tabs.query({'active': true, 'lastFocusedWindow': true, 'currentWindow': true}, function (tabs) {tabUrl = tabs[0].url;});	
+await chrome.browserAction.onClicked.addListener(function(tab) {chrome.tabs.update(tab.id, {url: url});serverReachables();});
+await chrome.tabs.query({'active': true, 'lastFocusedWindow': true, 'currentWindow': true}, function (tabs) {tabUrl = tabs[0].url;serverReachables();});	
 }
+
+function serverReachables() {
+	if (window.XMLHttpRequest) {
+		xmlhttp=new XMLHttpRequest();
+	} else {
+		xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+		xmlhttp.onreadystatechange=function() {
+	if (this.readyState==4 && this.status==200) {
+		//pass
+	}
+	}
+	xmlhttp.open("GET","http://127.0.0.1/index.html",true);
+	xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	xmlhttp.timeout = 1000;
+	xmlhttp.onreadystatechange = evaluateit();
+	}	
+	
+function evaluateit(){
+	try {
+	xmlhttp.send();
+	xmlhttp.onload = function() {
+	  if (xmlhttp.status != 200) { // analyze HTTP status of the response
+		status = "  ";
+		chrome.browserAction.setBadgeText( { text: status } );
+		chrome.browserAction.setBadgeBackgroundColor({color: "red"});
+		chrome.browserAction.setBadgeBackgroundColor({"color": [250, 0, 0, 100]});
+		
+	  } else { // show the result
+		status = "OK";
+		chrome.browserAction.setBadgeText( { text: status } );
+		chrome.browserAction.setBadgeBackgroundColor({color: "green"}); 
+		chrome.browserAction.setBadgeBackgroundColor({"color": [0,250,0,100]}); 
+	  }
+	};		
+	} catch (e) {
+	//alert("test1");
+	chrome.browserAction.setBadgeBackgroundColor({color: "red"});
+	return false;
+	}	
+}	
 
 function sendCurrentUrl() {
 	if (window.XMLHttpRequest) {
