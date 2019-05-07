@@ -3,6 +3,16 @@
   "description": "Press Ctrl+Shift+Y to add entrys, right mouse-click - Search in the Group  for search",
   "version": "1.0",
   "manifest_version": 2,
+  "content_scripts": [
+  {
+  "matches": [
+  "<all_urls>"
+  ],
+  "all_frames": true,
+  "run_at": "document_end",
+  "js": ["content.js"]
+  }
+  ],
   "permissions": [
   "activeTab",
   "contextMenus",
@@ -12,7 +22,7 @@
   "storage"
 	],  
   "background": {
-    "scripts": ["background.js"],
+    "scripts": ["background.js","script.js"],
     "persistent": false
   },
   "browser_action": {
@@ -21,10 +31,17 @@
   "commands": {
     "toggle-feature": {
       "suggested_key": {
-        "default": "Ctrl+Shift+Y",
+        "default": "Ctrl+Shift+5",
         "mac": "MacCtrl+Shift+Y"
        },
       "description": "Send a 'toggle-feature' event to the extension"
+    },
+    "sendlink": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+6",
+        "windows": "MediaNextTrack"
+      },
+      "description": "Play next song"
     }
   }
 }
