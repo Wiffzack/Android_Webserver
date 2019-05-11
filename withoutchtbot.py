@@ -59,14 +59,14 @@ threads = []
 workn = 1
 data = ''
 
-mysqln = 'wiffzackius.ddns.net'
+mysqln = '127.0.0.1'
 
 try:
 	try:
-		cnx = mysql.connector.connect(user='test1', password='fujitsu', database='unterlagen')
+		cnx = mysql.connector.connect(user='test1', password='12345678', database='whatever')
 		cursor = cnx.cursor()
 	except:
-		cnx = mysql.connector.connect(host=mysqln, user='test1', password='fujitsu', database='unterlagen')
+		cnx = mysql.connector.connect(host=mysqln, user='test1', password='12345678', database='whatever')
 		cursor = cnx.cursor()
 except:
 	print ("MySQL not available!")
