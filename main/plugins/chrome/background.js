@@ -7,11 +7,16 @@ var xmlhttp;
 var videotime;
 var vidsurl;
 var groupn;
+var guestid;
+var oldurl;
+var injurl;
 var status = " ";
 
 
 chrome.browserAction.setBadgeText( { text: status } );
 chrome.browserAction.setBadgeBackgroundColor({color: [0,0,250,250]});
+
+
 
 // Solve with content-script  so this is no longer required
 // This is were the fun begin!!!
@@ -29,6 +34,38 @@ s.onload = function() {
 //ytplayer = document.getElementById("movie_player");
 //ytplayer.getCurrentTime();
 
+// random from 0-1
+function getRandomInt(max) {
+	return Math.floor(Math.random() * Math.floor(max) + 1);
+}
+
+function getguestid(){
+	guestid = window.localStorage.getItem('guestid');
+	return (guestid);
+	//alert(guestid);
+
+}
+    
+// if no guestid exist generate one this is a primitive solution but should work for now	
+function generateguestid() {
+	var theID = getRandomInt(1000000);
+	if (!theID) {
+		alert("No id generated")
+	}
+	 window.localStorage.setItem('guestid', theID);
+}
+
+getguestid();
+if (!guestid) {
+	do{
+		generateguestid();
+	}while((!guestid));
+	var code = 'window.location.reload();';
+	chrome.tabs.executeScript(arrayOfTabs[0].id, {code: code});
+}
+
+//alert(guestid);
+	
 chrome.browserAction.onClicked.addListener(function (tab) {
 	// for the current tab, inject the "inject.js" file & execute it
 	chrome.tabs.executeScript(tab.ib, {
@@ -80,6 +117,7 @@ chrome.runtime.onInstalled.addListener(function() {
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab)  {
 	
 if (changeInfo.status == 'complete' && tab.active) {
+	//chrome.tabs.sendMessage(tabs[0].id, {guestnumber: guestid}, function(response) {console.log(response.farewell);});
 	chrome.tabs.query({'active': true, 'lastFocusedWindow': true, 'currentWindow': true}, function (tabs) {tabUrl = tabs[0].url;serverReachables();});	
 }
 });
@@ -106,7 +144,7 @@ function checkhttp()
 
 function serverReachables() {
 	checkhttp();
-	xmlhttp.open("GET","http://127.0.0.1/index.html",true);
+	xmlhttp.open("GET","https://127.0.0.1/index.html",true);
 	xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 	xmlhttp.timeout = 1000;
 	xmlhttp.onreadystatechange = evaluateit();
@@ -138,36 +176,26 @@ function evaluateit(){
 
 function sendCurrentUrl() {
 	checkhttp();
-	xmlhttp.open("GET","http://127.0.0.1/foobar_submit.php?url="+encodeURIComponent(tabUrl)+"&"+"keywords="+encodeURIComponent(keywords)+"&"+"rating="+encodeURIComponent(rating),true);
+	xmlhttp.open("GET","https://127.0.0.1/foobar_submit.php?url="+encodeURIComponent(tabUrl)+"&"+"keywords="+encodeURIComponent(keywords)+"&"+"rating="+encodeURIComponent(rating),true);
 	xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 	xmlhttp.timeout = 5000;
 	xmlhttp.send();
-	//req.open('POST', 'http://127.0.0.1/', true);
+	//req.open('POST', 'https://127.0.0.1/', true);
 	//req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 	//req.send('url=' + encodeURIComponent(url));
 	}
 	
 function getUrl() {
 	checkhttp();
-	window.open("http://127.0.0.1/search_plugin.php?keywords="+encodeURIComponent(searchword));
-	//window.location.replace("http://127.0.0.1/search_plugin.php?keywords="+encodeURIComponent(searchword));
+	window.open("https://127.0.0.1/search_plugin.php?keywords="+encodeURIComponent(searchword));
+	//window.location.replace("https://127.0.0.1/search_plugin.php?keywords="+encodeURIComponent(searchword));
 
 }	
 
-/*	
-function sendCurrentVideoTime() {
-	checkhttp();
-	xmlhttp.open("GET","http://127.0.0.1/settime.php?url="+encodeURIComponent(tabUrl)+"&"+"time="+encodeURIComponent(videotime),true);
-	xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-	xmlhttp.timeout = 5000;
-	xmlhttp.send();
-}
-*/	
-	
 function getvideourl() {
 	checkhttp();
-	window.open("http://127.0.0.1/gettime.php?keywords="+encodeURIComponent(vidsurl));
-	//window.location.replace("http://127.0.0.1/search_plugin.php?keywords="+encodeURIComponent(searchword));
+	window.open("https://127.0.0.1/gettime.php?keywords="+encodeURIComponent(vidsurl));
+	//window.location.replace("https://127.0.0.1/search_plugin.php?keywords="+encodeURIComponent(searchword));
 
 	}		
 	
@@ -271,19 +299,32 @@ chrome.contextMenus.onClicked.addListener(function(info, tab) {
 		}
 	}
 });
+
+
 chrome.contextMenus.onClicked.addListener(function(info, tab) {	
     if (info.menuItemId == "Share") {
 		refresh();
-		chrome.tabs.executeScript(tab.ib, {	file: 'inject.js'});
+		//chrome.tabs.executeScript(tab.ib, {	file: 'inject.js'});
+		chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+		var currenttab = tabs[0].id;
+		if(injurl==currenttab){
+			chrome.tabs.sendMessage(tabs[0].id, {parameter: guestid});	
+		}else{
+			injurl=tabs[0].id;
+			chrome.tabs.executeScript(tabs[0].id, {file: 'inject.js'}, function() {
+			chrome.tabs.sendMessage(tabs[0].id, {parameter: guestid});
+			});		
+		}
+	});
 	}
 });
+
 chrome.contextMenus.onClicked.addListener(function(info, tab) {	
     if (info.menuItemId == "GetTime") {
-		alert("work");
 		groupselect();
 		getvideourl();
 		refresh();
-		alert(getCookie("videourlcookie"));
+		//alert(getCookie("videourlcookie"));
 	}
 });
 
