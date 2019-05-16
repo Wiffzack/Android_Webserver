@@ -158,7 +158,7 @@ function checkhttp()
 
 function serverReachables() {
 	checkhttp();
-	xmlhttp.open("GET","http://wiffzack.ddns.net/index.html",true);
+	xmlhttp.open("GET","http://127.0.0.1/index.html",true);
 	xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 	xmlhttp.timeout = 1000;
 	xmlhttp.onreadystatechange = evaluateit();
@@ -190,19 +190,19 @@ function evaluateit(){
 
 function sendCurrentUrl() {
 	checkhttp();
-	xmlhttp.open("GET","http://wiffzack.ddns.net/foobar_submit.php?url="+encodeURIComponent(tabUrl)+"&"+"keywords="+encodeURIComponent(keywords)+"&"+"rating="+encodeURIComponent(rating),true);
+	xmlhttp.open("GET","http://127.0.0.1/foobar_submit.php?url="+encodeURIComponent(tabUrl)+"&"+"keywords="+encodeURIComponent(keywords)+"&"+"rating="+encodeURIComponent(rating),true);
 	xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 	xmlhttp.timeout = 5000;
 	xmlhttp.send();
-	//req.open('POST', 'http://wiffzack.ddns.net/', true);
+	//req.open('POST', 'http://127.0.0.1/', true);
 	//req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 	//req.send('url=' + encodeURIComponent(url));
 	}
 	
 function getUrl() {
 	checkhttp();
-	window.open("http://wiffzack.ddns.net/search_plugin.php?keywords="+encodeURIComponent(searchword));
-	//window.location.replace("http://wiffzack.ddns.net/search_plugin.php?keywords="+encodeURIComponent(searchword));
+	window.open("http://127.0.0.1/search_plugin.php?keywords="+encodeURIComponent(searchword));
+	//window.location.replace("http://127.0.0.1/search_plugin.php?keywords="+encodeURIComponent(searchword));
 
 }	
 
@@ -226,7 +226,7 @@ function sendurl(){
 	}
 	}
 	// chrome require https connections if not mention under exceptions!
-	xmlhttp.open("GET","http://wiffzack.ddns.net/settime.php?url="+encodeURIComponent(tabUrl)+"&"+"seconds="+encodeURIComponent(videotimesec)+"&"+"groupid="+encodeURIComponent(groupn)+"&"+"guestid="+encodeURIComponent(guestid),true);
+	xmlhttp.open("GET","http://127.0.0.1/settime.php?url="+encodeURIComponent(tabUrl)+"&"+"seconds="+encodeURIComponent(videotimesec)+"&"+"groupid="+encodeURIComponent(groupn)+"&"+"guestid="+encodeURIComponent(guestid),true);
 	xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 	xmlhttp.timeout = 5000;
 	xmlhttp.send();
@@ -235,8 +235,8 @@ function sendurl(){
 	
 function getvideourl() {
 	checkhttp();
-	window.open("http://wiffzack.ddns.net/gettime.php?keywords="+encodeURIComponent(vidsurl));
-	//window.location.replace("http://wiffzack.ddns.net/search_plugin.php?keywords="+encodeURIComponent(searchword));
+	window.open("http://127.0.0.1/gettime.php?keywords="+encodeURIComponent(vidsurl));
+	//window.location.replace("http://127.0.0.1/search_plugin.php?keywords="+encodeURIComponent(searchword));
 
 	}		
 	
