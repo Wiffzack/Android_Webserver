@@ -10,13 +10,22 @@ var groupn;
 var guestid;
 var oldurl;
 var injurl;
+var videotimesec;
 var status = " ";
 
 
 chrome.browserAction.setBadgeText( { text: status } );
 chrome.browserAction.setBadgeBackgroundColor({color: [0,0,250,250]});
 
+function onError(error) {
+  console.error('Error: ${error}');
+}
 
+	
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {	
+	videotimesec = request.parameter;
+	sendurl();
+});
 
 // Solve with content-script  so this is no longer required
 // This is were the fun begin!!!
@@ -192,6 +201,33 @@ function getUrl() {
 
 }	
 
+function sendurl(){
+	groupn = window.localStorage.getItem('groupn');
+	if (groupn == null || groupn == "") {
+		groupn = prompt("Which group number do you want?:", "");
+		window.localStorage.setItem('groupn', groupn);
+		if (groupn == null || groupn == "") {
+			txt = "User cancelled the prompt.";
+		}
+	}
+	if (window.XMLHttpRequest) {
+		xmlhttp=new XMLHttpRequest();
+	} else {
+		xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+		xmlhttp.onreadystatechange=function() {
+	if (this.readyState==4 && this.status==200) {
+		//pass
+	}
+	}
+	// chrome require https connections if not mention under exceptions!
+	xmlhttp.open("GET","http://127.0.0.1/settime.php?url="+encodeURIComponent(tabUrl)+"&"+"seconds="+encodeURIComponent(videotimesec)+"&"+"groupid="+encodeURIComponent(groupn)+"&"+"guestid="+encodeURIComponent(guestid),true);
+	xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+	xmlhttp.timeout = 5000;
+	xmlhttp.send();
+	
+	}	
+	
 function getvideourl() {
 	checkhttp();
 	window.open("https://127.0.0.1/gettime.php?keywords="+encodeURIComponent(vidsurl));
@@ -300,24 +336,53 @@ chrome.contextMenus.onClicked.addListener(function(info, tab) {
 	}
 });
 
-
+/*
+chrome.runtime.onMessage.addListener(
+  function(request, sender, sendResponse) {
+	if (request.cmd == "any command") {
+	  sendResponse({ result: "any response from background" });
+	} else {
+	  sendResponse({ result: "error", message: `Invalid 'cmd'` });
+	}
+	// Note: Returning true is required here!
+	//  ref: http://stackoverflow.com/questions/20077487/chrome-extension-message-passing-response-not-sent
+	return true; 
+  });
+*/
+  
 chrome.contextMenus.onClicked.addListener(function(info, tab) {	
     if (info.menuItemId == "Share") {
 		refresh();
 		//chrome.tabs.executeScript(tab.ib, {	file: 'inject.js'});
 		chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-		var currenttab = tabs[0].id;
+		var currenttab =tabs[0].id;
 		if(injurl==currenttab){
-			chrome.tabs.sendMessage(tabs[0].id, {parameter: guestid});	
+			chrome.tabs.sendMessage(tabs[0].id, {parameter: guestid});		
 		}else{
 			injurl=tabs[0].id;
 			chrome.tabs.executeScript(tabs[0].id, {file: 'inject.js'}, function() {
-			chrome.tabs.sendMessage(tabs[0].id, {parameter: guestid});
+			chrome.tabs.sendMessage(tabs[0].id, {parameter: guestid});	
 			});		
 		}
 	});
 	}
 });
+
+
+/*
+chrome.contextMenus.onClicked.addListener(function(info, tab) {	
+    if (info.menuItemId == "Share") {
+		refresh();
+		//chrome.tabs.executeScript(tab.ib, {	file: 'inject.js'});
+	
+		chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+			chrome.tabs.executeScript(tabs[0].id, {file: 'inject.js'}, function() {
+			chrome.tabs.sendMessage(tabs[0].id, {parameter: guestid});
+			});		
+			});
+	}
+});
+*/
 
 chrome.contextMenus.onClicked.addListener(function(info, tab) {	
     if (info.menuItemId == "GetTime") {
