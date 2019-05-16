@@ -1,5 +1,40 @@
 (function() {
 	var guestid;	
+	var videotimesec;
+
+	
+    chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {	
+		var tabUrl = window.location.toString();
+		var element =  document.getElementById('movie_player');
+		if (typeof(element) != 'undefined' && element != null)
+		{	
+		video = document.getElementsByClassName('video-stream')[0];
+		videotimesec = Math.round(video.currentTime);
+		}
+        guestid = request.parameter;
+		//alert(guestid);
+		if(guestid){
+			sendanswer();
+		}
+	});
+	
+	// chrome.tabs.sendMessage(tabs[0].id, {parameter: guestid});	
+	function sendanswer(){
+	// careful with  JSON
+	var event = new CustomEvent('PassToBackground', { detail: { 'detail1': videotimesec } });	
+	window.dispatchEvent(event);
+		
+	// A page-context script cannot, indeed, use Chrome API.	
+	/*
+	chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+		chrome.tabs.sendMessage(tabs[0].id, {parameter: videotimesec}, function(response) {
+		alert("easy send");
+	  });
+	});
+	*/
+	}	
+	
+	/*
 	// used to recive the guestid
 	// I could move the groupn to the background script ... maybe
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
@@ -49,7 +84,7 @@
 		}
 		}
 		// chrome require https connections if not mention under exceptions!
-		xmlhttp.open("GET","https://127.0.0.1/settime.php?url="+encodeURIComponent(tabUrl)+"&"+"seconds="+encodeURIComponent(videotimesec)+"&"+"groupid="+encodeURIComponent(groupn)+"&"+"guestid="+encodeURIComponent(guestid),true);
+		xmlhttp.open("GET","https://wiffzack.ddns.net/settime.php?url="+encodeURIComponent(tabUrl)+"&"+"seconds="+encodeURIComponent(videotimesec)+"&"+"groupid="+encodeURIComponent(groupn)+"&"+"guestid="+encodeURIComponent(guestid),true);
 		xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 		xmlhttp.timeout = 5000;
 		xmlhttp.send();
