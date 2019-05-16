@@ -12,8 +12,7 @@
 		videotimesec = Math.round(video.currentTime);
 		}
         guestid = request.parameter;
-		//alert(guestid);
-		if(guestid){
+		if(videotimesec){
 			sendanswer();
 		}
 	});
