@@ -17,6 +17,8 @@ var status = " ";
 chrome.browserAction.setBadgeText( { text: status } );
 chrome.browserAction.setBadgeBackgroundColor({color: [0,0,250,250]});
 
+readygo();
+
 function onError(error) {
   console.error('Error: ${error}');
 }
@@ -49,29 +51,32 @@ function getRandomInt(max) {
 }
 
 function getguestid(){
-	guestid = window.localStorage.getItem('guestid');
+	guestid = JSON.parse(localStorage.getItem('guestid') || '{}')[0];
+	setTimeout(function(){}, 200);
 	return (guestid);
 	//alert(guestid);
 
-}
+};
     
 // if no guestid exist generate one this is a primitive solution but should work for now	
 function generateguestid() {
-	var theID = getRandomInt(1000000);
-	if (!theID) {
+	guestid = getRandomInt(1000000);
+	if (!guestid) {
 		alert("No id generated")
 	}
-	 window.localStorage.setItem('guestid', theID);
-}
+	localStorage.setItem('guestid', JSON.stringify(guestid))
+	setTimeout(function(){}, 500);
+};
 
-getguestid();
-if (!guestid) {
-	do{
+
+function readygo(){
+	getguestid();
+	setTimeout(function(){}, 500);
+	if (!guestid) {
 		generateguestid();
-	}while((!guestid));
-	var code = 'window.location.reload();';
-	chrome.tabs.executeScript(arrayOfTabs[0].id, {code: code});
-}
+	}
+};
+
 
 //alert(guestid);
 	
@@ -153,7 +158,7 @@ function checkhttp()
 
 function serverReachables() {
 	checkhttp();
-	xmlhttp.open("GET","https://127.0.0.1/index.html",true);
+	xmlhttp.open("GET","http://wiffzack.ddns.net/index.html",true);
 	xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 	xmlhttp.timeout = 1000;
 	xmlhttp.onreadystatechange = evaluateit();
@@ -185,19 +190,19 @@ function evaluateit(){
 
 function sendCurrentUrl() {
 	checkhttp();
-	xmlhttp.open("GET","https://127.0.0.1/foobar_submit.php?url="+encodeURIComponent(tabUrl)+"&"+"keywords="+encodeURIComponent(keywords)+"&"+"rating="+encodeURIComponent(rating),true);
+	xmlhttp.open("GET","http://wiffzack.ddns.net/foobar_submit.php?url="+encodeURIComponent(tabUrl)+"&"+"keywords="+encodeURIComponent(keywords)+"&"+"rating="+encodeURIComponent(rating),true);
 	xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 	xmlhttp.timeout = 5000;
 	xmlhttp.send();
-	//req.open('POST', 'https://127.0.0.1/', true);
+	//req.open('POST', 'http://wiffzack.ddns.net/', true);
 	//req.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 	//req.send('url=' + encodeURIComponent(url));
 	}
 	
 function getUrl() {
 	checkhttp();
-	window.open("https://127.0.0.1/search_plugin.php?keywords="+encodeURIComponent(searchword));
-	//window.location.replace("https://127.0.0.1/search_plugin.php?keywords="+encodeURIComponent(searchword));
+	window.open("http://wiffzack.ddns.net/search_plugin.php?keywords="+encodeURIComponent(searchword));
+	//window.location.replace("http://wiffzack.ddns.net/search_plugin.php?keywords="+encodeURIComponent(searchword));
 
 }	
 
@@ -221,7 +226,7 @@ function sendurl(){
 	}
 	}
 	// chrome require https connections if not mention under exceptions!
-	xmlhttp.open("GET","http://127.0.0.1/settime.php?url="+encodeURIComponent(tabUrl)+"&"+"seconds="+encodeURIComponent(videotimesec)+"&"+"groupid="+encodeURIComponent(groupn)+"&"+"guestid="+encodeURIComponent(guestid),true);
+	xmlhttp.open("GET","http://wiffzack.ddns.net/settime.php?url="+encodeURIComponent(tabUrl)+"&"+"seconds="+encodeURIComponent(videotimesec)+"&"+"groupid="+encodeURIComponent(groupn)+"&"+"guestid="+encodeURIComponent(guestid),true);
 	xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 	xmlhttp.timeout = 5000;
 	xmlhttp.send();
@@ -230,8 +235,8 @@ function sendurl(){
 	
 function getvideourl() {
 	checkhttp();
-	window.open("https://127.0.0.1/gettime.php?keywords="+encodeURIComponent(vidsurl));
-	//window.location.replace("https://127.0.0.1/search_plugin.php?keywords="+encodeURIComponent(searchword));
+	window.open("http://wiffzack.ddns.net/gettime.php?keywords="+encodeURIComponent(vidsurl));
+	//window.location.replace("http://wiffzack.ddns.net/search_plugin.php?keywords="+encodeURIComponent(searchword));
 
 	}		
 	
